@@ -48,6 +48,8 @@ const PLACE_FOLDERS = new Set([
   'Tokyo',
   'Italy',
   'Copenhagen',
+  'Danish Spftball',
+  'Softball GE',
 ])
 
 // Approximate coordinates for seed folders so the world map has pins even
@@ -55,12 +57,16 @@ const PLACE_FOLDERS = new Set([
 // when found in EXIF). Purely a dev-seed convenience.
 const PLACE_COORDS: Record<string, { lat: number; lng: number }> = {
   'Sol over gudhjem': { lat: 55.2263, lng: 14.9401 },
-  'Cape Wotn SE': { lat: 34.0259, lng: -118.7798 },
+  // Was wrongly set to Malibu/Agoura Hills, CA (34.0259, -118.7798) —
+  // "Cape Wotn SE" is Cape Town, South Africa, not California.
+  'Cape Wotn SE': { lat: -33.9249, lng: 18.4241 },
   'Santa Monica Beach': { lat: 34.0195, lng: -118.4912 },
   Chicago: { lat: 41.8781, lng: -87.6298 },
   Tokyo: { lat: 35.6762, lng: 139.6503 },
   Italy: { lat: 43.7696, lng: 11.2558 },
   Copenhagen: { lat: 55.6761, lng: 12.5683 },
+  'Danish Spftball': { lat: 55.6497, lng: 12.6001 }, // Amager, Copenhagen
+  'Softball GE': { lat: 41.8775, lng: -88.0662 }, // Glen Ellyn, Illinois
 }
 
 function hashCode(str: string): number {

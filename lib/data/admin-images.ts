@@ -1,5 +1,6 @@
 import 'server-only'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import sharp from 'sharp'
 import exifr from 'exifr'
@@ -62,8 +63,32 @@ export async function createImageFromUpload(input: UploadInput): Promise<Portfol
 
   if (isSupabaseConfigured()) {
     const admin = getSupabaseAdminClient()!
-    const id = nanoid()
-    const storagePath = `${input.collectionId}/${id}.${meta.format ?? 'jpg'}`
+
+    // Resolve the real collection UUID. When the visitor typed a new
+    // collection name, `input.collectionId` is NOT a valid id at all (the
+    // client sends the new title in its place) — this branch previously
+    // ignored `newCollectionTitle` entirely and inserted straight into
+    // `input.collectionId`, which either silently landed in whatever
+    // collection happened to be selected in the dropdown, or crashed with
+    // an invalid-UUID error if it wasn't one. Upsert-by-slug so re-uploads
+    // into the same new collection name don't create duplicates.
+    let collectionId = input.collectionId
+    if (input.newCollectionTitle?.trim()) {
+      const slug = slugify(input.newCollectionTitle.trim())
+      const { data: collection, error: collectionError } = await admin
+        .from('collections')
+        .upsert({ slug, title: input.newCollectionTitle.trim() }, { onConflict: 'slug', ignoreDuplicates: false })
+        .select('id')
+        .single()
+      if (collectionError) throw collectionError
+      collectionId = collection.id
+    }
+
+    // Must be a real UUID — images.id is `uuid primary key`. nanoid()'s
+    // output (used elsewhere for non-DB ids like storage-only filenames)
+    // is NOT a valid UUID and Postgres rejects it outright (22P02).
+    const id = randomUUID()
+    const storagePath = `${collectionId}/${id}.${meta.format ?? 'jpg'}`
 
     const sizes: Array<{ name: 'thumb' | 'medium' | 'large'; width: number; quality: number }> = [
       { name: 'thumb', width: 480, quality: 72 },
@@ -74,7 +99,7 @@ export async function createImageFromUpload(input: UploadInput): Promise<Portfol
       admin.storage.from('images-original').upload(storagePath, buffer, { contentType: `image/${meta.format}` }),
       ...sizes.map(async ({ name, width: w, quality }) => {
         const derived = await sharp(buffer).rotate().resize({ width: w, withoutEnlargement: true }).webp({ quality }).toBuffer()
-        const derivedPath = `${input.collectionId}/${id}-${name}.webp`
+        const derivedPath = `${collectionId}/${id}-${name}.webp`
         await admin.storage.from('images-derived').upload(derivedPath, derived, { contentType: 'image/webp' })
       }),
     ])
@@ -84,7 +109,7 @@ export async function createImageFromUpload(input: UploadInput): Promise<Portfol
       .from('images')
       .insert({
         id,
-        collection_id: input.collectionId,
+        collection_id: collectionId,
         slug: slugify(id),
         title: 'Untitled',
         keywords: [],
