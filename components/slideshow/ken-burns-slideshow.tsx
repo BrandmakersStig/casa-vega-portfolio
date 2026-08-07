@@ -8,6 +8,24 @@ import { X } from 'lucide-react'
 import type { PortfolioImage } from '@/types'
 
 const SLIDE_DURATION = 6000
+// Cap on how far a portrait image is allowed to zoom to reach "fills the
+// screen" — an extreme aspect-ratio mismatch (very tall/thin photo in a
+// near-square window) would otherwise demand a huge, disorienting zoom.
+const MAX_PORTRAIT_ZOOM = 1.9
+
+/** Tracks the viewport in state so the zoom target can be computed per photo. */
+function useViewportSize() {
+  const [size, setSize] = useState({ width: 1600, height: 900 })
+  useEffect(() => {
+    function update() {
+      setSize({ width: window.innerWidth, height: window.innerHeight })
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  return size
+}
 
 /**
  * Full-viewport, chrome-free slideshow — "Cinematic View". Auto-advances with
@@ -19,6 +37,7 @@ const SLIDE_DURATION = 6000
 export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: PortfolioImage[]; exitHref?: string }) {
   const [index, setIndex] = useState(0)
   const [showCaption, setShowCaption] = useState(false)
+  const viewport = useViewportSize()
 
   useEffect(() => {
     if (images.length < 2) return
@@ -37,6 +56,24 @@ export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: Portfoli
 
   const current = images[index]
   if (!current) return null
+
+  // The photo below is object-contain, i.e. it starts fully visible,
+  // letterboxed on whichever axis doesn't match the viewport. For a
+  // portrait photo (the common case that used to get cropped) we then
+  // animate it up to the scale where it exactly fills the screen edge to
+  // edge — the ratio between the "cover" and "contain" fit factors for
+  // this image's real dimensions against the current viewport. The scale
+  // transform is centered by default, so this zooms straight into the
+  // middle of the frame (where the subject usually is) rather than
+  // drifting toward an edge.
+  const { width: iw, height: ih } = current.dimensions
+  const isPortrait = ih > iw
+  let targetScale = 1.06
+  if (isPortrait && iw > 0 && ih > 0) {
+    const containFit = Math.min(viewport.width / iw, viewport.height / ih)
+    const coverFit = Math.max(viewport.width / iw, viewport.height / ih)
+    if (containFit > 0) targetScale = Math.min(coverFit / containFit, MAX_PORTRAIT_ZOOM)
+  }
 
   return (
     <div
@@ -69,7 +106,7 @@ export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: Portfoli
           key={current.id}
           className="absolute inset-0"
           initial={{ opacity: 0, scale: 1 }}
-          animate={{ opacity: 1, scale: 1.06 }}
+          animate={{ opacity: 1, scale: targetScale }}
           exit={{ opacity: 0 }}
           transition={{ opacity: { duration: 1.6, ease: 'easeInOut' }, scale: { duration: SLIDE_DURATION / 1000, ease: 'linear' } }}
         >
