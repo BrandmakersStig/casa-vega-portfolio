@@ -66,8 +66,17 @@ create index if not exists images_collection_idx on images (collection_id);
 create index if not exists images_rating_idx on images (rating);
 create index if not exists images_keywords_idx on images using gin (keywords);
 create index if not exists images_created_idx on images (created_at desc);
+-- to_tsvector(regconfig, text) is only STABLE, not IMMUTABLE (the search
+-- config could theoretically change), so it can't be used directly in an
+-- index expression. Wrap it in our own function — safe since we hardcode
+-- 'simple' and never change it.
+create or replace function images_search_text(title text, description text, location text, keywords text[])
+returns tsvector as $$
+  select to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(description, '') || ' ' || coalesce(location, '') || ' ' || array_to_string(keywords, ' '));
+$$ language sql immutable;
+
 create index if not exists images_search_idx on images using gin (
-  to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(description,'') || ' ' || coalesce(location,'') || ' ' || array_to_string(keywords, ' '))
+  images_search_text(title, description, location, keywords)
 );
 
 -- ---------------------------------------------------------------------------
