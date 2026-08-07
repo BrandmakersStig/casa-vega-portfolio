@@ -4,8 +4,9 @@ Et eksklusivt fotografi-portfolio. Next.js 16 (App Router) + TypeScript +
 Tailwind v4 + shadcn/ui + Framer Motion, med Supabase (Postgres + Storage +
 Auth) som backend.
 
-Separat projekt fra `casa-vega` — deployes for sig selv og kobles til
-`casa-vega.dk/portfolio` via en rewrite i casa-vega-projektet (se nederst).
+Separat projekt fra `casa-vega`, deployes for sig selv.
+
+**Live:** https://portfolio.casa-vega.dk (og https://casa-vega-portfolio.vercel.app)
 
 ## Kom i gang
 
@@ -59,24 +60,27 @@ Sæt de samme env-variabler som ovenfor i Vercel's projekt-settings, plus
 `ADMIN_SESSION_SECRET` (kun relevant i dev-fallback — kan udelades i
 produktion når Supabase er konfigureret, men skader ikke at sætte).
 
-## Kobl til casa-vega.dk/portfolio
+## Domæne
 
-Dette projekt kører på sit eget Vercel-domæne (fx
-`casa-vega-portfolio.vercel.app`). For at vise det på
-`casa-vega.dk/portfolio` tilføjes en rewrite i **casa-vega**-projektet
-(`casa-vega/next.config.ts`):
+Kører på `portfolio.casa-vega.dk` — et subdomæne, ikke en sti under
+casa-vega.dk/portfolio. Det blev valgt bevidst: en sti-baseret proxy
+(`casa-vega.dk/portfolio` → dette projekt) ville kræve at alle interne
+links, `fetch()`-kald og navigation i denne app kendte til sit eget
+subpath (Next.js `basePath`) — en større, mere skrøbelig ændring for
+ingen reel gevinst. Subdomænet virkede med det samme uden nogen
+kodeændring, arvet direkte fra casa-vega.dk's eksisterende DNS/Vercel-
+opsætning (tilføjet via `vercel domains add portfolio.casa-vega.dk
+casa-vega-portfolio`).
 
-```ts
-async rewrites() {
-  return [
-    { source: '/portfolio', destination: 'https://casa-vega-portfolio.vercel.app' },
-    { source: '/portfolio/:path*', destination: 'https://casa-vega-portfolio.vercel.app/:path*' },
-  ]
-}
+Vercel anbefaler (valgfrit, ikke nødvendigt lige nu — domænet virker fint)
+at opdatere DNS til en dedikeret CNAME i stedet for at arve fra apex-
+domænets A-record:
+
 ```
-
-Dette er en ændring i det andet repo og bør kun laves når portfolio-sitet
-er klar til produktion (spørg før du deployer den ændring).
+Type: CNAME
+Name: portfolio
+Value: 6d6203b9eeba1bc1.vercel-dns-017.com.
+```
 
 ## Scripts
 

@@ -4,9 +4,8 @@
 
 Portfolio-website for [en fotografs] arbejde. Bygget som et **helt separat
 GitHub/Vercel-projekt** fra casa-vega — det er IKKE en del af casa-vega's
-kodebase. Det kobles til `casa-vega.dk/portfolio` via en Vercel rewrite i
-casa-vega-projektet (se "Domain routing" nedenfor), ikke ved at ligge i
-samme repo.
+kodebase. Live på `portfolio.casa-vega.dk` — et **subdomæne** (ikke en sti
+under casa-vega.dk/portfolio, se "Domain routing" nedenfor for hvorfor).
 
 ## Arkitektur
 
@@ -96,15 +95,19 @@ samme repo.
 ## Kendte begrænsninger / ikke bygget endnu
 
 Se `ROADMAP.md` for en ærlig status over hvad der er fuldt bygget vs.
-forberedt-men-ikke-implementeret (AI-keywords, Lightroom-integration,
-print-bestilling, offline-cache, light table, klientgallerier).
+forberedt-men-ikke-implementeret (i skrivende stund kun: Lightroom-
+integration, klientgalleriers allow-favorites/allow-download-håndhævelse).
 
-## Domain routing (casa-vega.dk/portfolio)
+## Domain routing
 
-Dette projekt deployes separat til Vercel og kobles til
-`casa-vega.dk/portfolio` via en rewrite i **casa-vega**-projektet (ikke
-her) — Stig har bedt om at få dette tilføjet når portfolio-sitet er klar
-til deploy, ikke før. Rør ikke `casa-vega`-repoet fra denne kodebase.
+Live på `portfolio.casa-vega.dk` — et **subdomæne**, bevidst IKKE en sti
+under casa-vega.dk/portfolio. En sti-baseret proxy ville kræve at hele
+appen (alle `fetch()`-kald, `window.history.pushState`, interne links)
+kendte sit eget subpath (Next.js `basePath`) — en større, skrøbelig
+ændring for ingen reel gevinst. Subdomænet virkede med det samme uden
+kodeændringer, tilføjet via `vercel domains add portfolio.casa-vega.dk
+casa-vega-portfolio` (arver DNS fra casa-vega.dk's eksisterende
+Vercel-opsætning). Rør ikke `casa-vega`-repoet fra denne kodebase.
 
 ## Når du er i tvivl
 
