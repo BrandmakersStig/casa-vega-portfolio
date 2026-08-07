@@ -99,24 +99,27 @@ export function PhotoGrid({ images, backHref, initialImageId }: PhotoGridProps) 
 
       {layoutMode === 'justified' && (
         <div className="flex flex-wrap gap-1">
-          {visible.map((img) => {
-            const ratio = img.dimensions.width / img.dimensions.height
-            return (
-              <button
-                key={img.id}
-                onClick={() => handleOpen(img)}
-                className="group relative block overflow-hidden bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground"
-                style={{ height: JUSTIFIED_ROW_HEIGHT, flexGrow: ratio * 10, flexBasis: `${ratio * JUSTIFIED_ROW_HEIGHT}px` }}
-                aria-label={`Åbn ${img.title}`}
-              >
-                <PhotoThumb
-                  image={img}
-                  sizes="600px"
-                  className="transition-transform duration-500 group-hover:scale-105"
-                />
-              </button>
-            )
-          })}
+          {visible.map((img) => (
+            <button
+              key={img.id}
+              onClick={() => handleOpen(img)}
+              className="group relative block shrink-0 overflow-hidden bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground"
+              // Height fixed, width derived purely from the image's own
+              // aspect-ratio (no flex-grow stretching) — a row's items line
+              // up at a shared height without ever distorting a portrait
+              // image wider than its true shape. object-cover below then
+              // never has anything to crop, since the box already is the
+              // image's exact proportions.
+              style={{ height: JUSTIFIED_ROW_HEIGHT, aspectRatio: `${img.dimensions.width} / ${img.dimensions.height}` }}
+              aria-label={`Åbn ${img.title}`}
+            >
+              <PhotoThumb
+                image={img}
+                sizes="600px"
+                className="transition-transform duration-500 group-hover:scale-105"
+              />
+            </button>
+          ))}
         </div>
       )}
 

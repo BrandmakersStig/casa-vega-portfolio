@@ -108,9 +108,9 @@ export function LightTableView() {
           Søg efter billeder ovenfor, eller tilføj dem fra lightboxen (ikonet ved siden af favorit-hjertet) — de vises her side om side til sammenligning.
         </p>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex items-end gap-4 overflow-x-auto pb-4">
           {images.map((img) => (
-            <div key={img.id} className="relative flex w-[min(80vw,420px)] shrink-0 flex-col">
+            <div key={img.id} className="relative flex shrink-0 flex-col" style={{ width: 'max-content' }}>
               <button
                 onClick={() => remove(img.id)}
                 aria-label="Fjern fra light table"
@@ -118,10 +118,16 @@ export function LightTableView() {
               >
                 <X className="size-4" />
               </button>
-              <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
-                <Image src={img.urls.medium} alt={img.title} fill sizes="420px" className="object-cover" />
+              {/* Fixed height, width derived from the image's own aspect
+                  ratio — never crops a portrait image into a landscape box
+                  or vice versa, unlike a fixed aspect-ratio container would. */}
+              <div
+                className="relative max-w-[80vw] overflow-hidden bg-muted"
+                style={{ height: 420, aspectRatio: `${img.dimensions.width} / ${img.dimensions.height}` }}
+              >
+                <Image src={img.urls.medium} alt={img.title} fill sizes="500px" className="object-contain" />
               </div>
-              <div className="mt-2 space-y-1">
+              <div className="mt-2 max-w-[min(80vw,420px)] space-y-1">
                 <p className="truncate text-sm font-medium">{img.title}</p>
                 <RatingStars rating={img.rating} />
                 {img.exif.camera && <p className="text-xs text-muted-foreground">{img.exif.camera}</p>}
