@@ -10,6 +10,7 @@ import { LightboxImage } from './lightbox-image'
 import { InfoPanel } from './info-panel'
 import { RatingStars } from './rating-stars'
 import { FavoriteButton } from '@/components/favorites/favorite-button'
+import { LightTableButton } from '@/components/light-table/light-table-button'
 import { ShareMenu } from './share-menu'
 import { KeyboardShortcutsOverlay } from './keyboard-shortcuts-overlay'
 import { cn } from '@/lib/utils'
@@ -126,6 +127,7 @@ export function Lightbox({ images, backHref }: { images: PortfolioImage[]; backH
               </button>
               <div className="flex items-center gap-1">
                 <FavoriteButton imageId={image.id} className="text-white hover:bg-white/10" />
+                <LightTableButton imageId={image.id} className="text-white hover:bg-white/10" />
                 <ShareMenu image={image} />
                 <button
                   onClick={cycleInfoMode}
