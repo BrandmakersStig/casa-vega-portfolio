@@ -131,6 +131,12 @@ export async function createImageFromUpload(input: UploadInput): Promise<Portfol
       .single()
     if (error) throw error
 
+    // A collection's cover_image_id is never auto-set by the DB — without
+    // this, a brand-new collection's card stays a blank grey placeholder
+    // forever (confirmed live: "USA 2019" had 21 images and no cover after
+    // upload-folder.ts created it). Only set it once, for the first image.
+    await admin.from('collections').update({ cover_image_id: id }).eq('id', collectionId).is('cover_image_id', null)
+
     const { mapImageRow } = await import('./mappers')
     return mapImageRow(data)
   }

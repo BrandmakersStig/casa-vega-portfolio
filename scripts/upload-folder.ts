@@ -139,6 +139,11 @@ async function main() {
       })
       if (error) throw error
 
+      // Same fix as lib/data/admin-images.ts: a collection's cover_image_id
+      // is never auto-set — without this the collection card stays a blank
+      // grey placeholder forever. Only set it once, for the first image.
+      await supabase.from('collections').update({ cover_image_id: id }).eq('id', collection.id).is('cover_image_id', null)
+
       uploaded++
       process.stdout.write('done\n')
     } catch (err) {
