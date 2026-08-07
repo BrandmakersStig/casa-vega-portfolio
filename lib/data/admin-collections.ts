@@ -5,7 +5,7 @@ import path from 'node:path'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { slugify } from '@/lib/utils/slugify'
-import type { Collection } from '@/types'
+import type { Collection, SmartCollectionRule } from '@/types'
 
 const FALLBACK_PATH = path.join(process.cwd(), 'lib/data/fallback/collections.json')
 
@@ -26,9 +26,14 @@ export function hashPassword(password: string): string {
   return createHash('sha256').update(password).digest('hex')
 }
 
-export async function createCollection(title: string): Promise<Collection> {
+export async function createCollection(
+  title: string,
+  opts: { isSmart?: boolean; smartRules?: SmartCollectionRule[] } = {}
+): Promise<Collection> {
   const slug = slugify(title)
   const now = new Date().toISOString()
+  const isSmart = opts.isSmart ?? false
+  const smartRules = isSmart ? (opts.smartRules ?? []) : null
 
   if (!isSupabaseConfigured()) {
     const collections = await readAll()
@@ -43,8 +48,8 @@ export async function createCollection(title: string): Promise<Collection> {
       featured: false,
       visibility: 'public',
       passwordProtected: false,
-      isSmart: false,
-      smartRules: null,
+      isSmart,
+      smartRules,
       createdAt: now,
       updatedAt: now,
       sortOrder: collections.length,
@@ -55,14 +60,18 @@ export async function createCollection(title: string): Promise<Collection> {
   }
 
   const admin = getSupabaseAdminClient()!
-  const { data, error } = await admin.from('collections').insert({ slug, title }).select().single()
+  const { data, error } = await admin
+    .from('collections')
+    .insert({ slug, title, is_smart: isSmart, smart_rules: smartRules })
+    .select()
+    .single()
   if (error) throw error
   const { mapCollectionRow } = await import('./mappers')
   return mapCollectionRow(data)
 }
 
 type CollectionPatch = Partial<
-  Pick<Collection, 'title' | 'description' | 'featured' | 'visibility' | 'coverImageId' | 'sortOrder'>
+  Pick<Collection, 'title' | 'description' | 'featured' | 'visibility' | 'coverImageId' | 'sortOrder' | 'smartRules'>
 > & { password?: string | null }
 
 export async function updateCollection(id: string, patch: CollectionPatch): Promise<void> {
@@ -92,6 +101,7 @@ export async function updateCollection(id: string, patch: CollectionPatch): Prom
   if (patch.visibility !== undefined) row.visibility = patch.visibility
   if (patch.coverImageId !== undefined) row.cover_image_id = patch.coverImageId
   if (patch.sortOrder !== undefined) row.sort_order = patch.sortOrder
+  if (patch.smartRules !== undefined) row.smart_rules = patch.smartRules
   if (patch.password !== undefined) {
     row.password_hash = patch.password ? hashPassword(patch.password) : null
   }

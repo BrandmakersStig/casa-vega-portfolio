@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getCollectionBySlug } from '@/lib/data/collections'
-import { getImages } from '@/lib/data/images'
+import { getCollectionImages } from '@/lib/data/images'
 import { CollectionDetail } from '@/components/collections/collection-detail'
 import { CollectionGate } from '@/components/collections/collection-gate'
 import { hasCollectionAccess } from '@/lib/auth/collection-access'
@@ -36,8 +36,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
   // Password-protected collections are excluded from the anon RLS policy
   // entirely (see supabase/migrations/0001_init.sql); once the cookie gate
   // above has verified access, fetch as includeAll to bypass it too.
-  const images = await getImages({
-    collectionId: collection.id,
+  const images = await getCollectionImages(collection, {
     sort: (sort as SortOption) ?? 'newest',
     includeAll: collection.passwordProtected,
   })

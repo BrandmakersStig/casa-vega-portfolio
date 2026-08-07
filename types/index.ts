@@ -125,7 +125,8 @@ export interface ClientGallery {
   clientName: string | null
   collectionIds: string[]
   imageIds: string[]
-  passwordHash: string | null
+  /** Never the raw hash — see lib/data/admin-client-galleries.ts for the internal row shape that carries it. */
+  passwordProtected: boolean
   expiresAt: string | null
   allowFavorites: boolean
   allowDownload: boolean

@@ -181,6 +181,20 @@ export async function getImageById(id: string): Promise<PortfolioImage | null> {
   return withStats
 }
 
+/**
+ * Images belonging to a collection — manual (by collection_id) or smart
+ * (rule-evaluated across all images, see lib/data/smart-collections.ts).
+ * Centralizes the branch so both /collections/[slug] routes stay in sync.
+ */
+export async function getCollectionImages(collection: Collection, opts: { sort?: SortOption; includeAll?: boolean } = {}): Promise<PortfolioImage[]> {
+  if (collection.isSmart) {
+    const { evaluateSmartRules } = await import('./smart-collections')
+    const all = await getImages({ sort: opts.sort, includeAll: opts.includeAll })
+    return evaluateSmartRules(collection.smartRules, all)
+  }
+  return getImages({ collectionId: collection.id, sort: opts.sort, includeAll: opts.includeAll })
+}
+
 export interface Facets {
   cameras: string[]
   lenses: string[]

@@ -15,7 +15,8 @@ export async function getCollections(opts: { featuredOnly?: boolean; includeAll?
   if (!isSupabaseConfigured()) {
     let list = opts.includeAll ? FALLBACK : FALLBACK.filter((c) => c.visibility === 'public')
     if (opts.featuredOnly) list = list.filter((c) => c.featured)
-    return list.sort((a, b) => a.sortOrder - b.sortOrder)
+    list = list.sort((a, b) => a.sortOrder - b.sortOrder)
+    return resolveSmartCollectionCounts(list)
   }
 
   // Admin views (includeAll) bypass RLS via the service-role client — the
@@ -27,14 +28,45 @@ export async function getCollections(opts: { featuredOnly?: boolean; includeAll?
 
   const { data, error } = await q
   if (error) throw error
-  return (data ?? []).map(mapCollectionRow)
+  const collections = (data ?? []).map(mapCollectionRow)
+  return resolveSmartCollectionCounts(collections)
+}
+
+/**
+ * Smart collections have no images directly assigned (collection_id), so
+ * the FK-based `images(count)` embed and stored cover_image_id are always
+ * empty/null for them — evaluate their rules once against the full image
+ * set to get an accurate count and a cover image.
+ */
+async function resolveSmartCollectionCounts(collections: Collection[]): Promise<Collection[]> {
+  const smartOnes = collections.filter((c) => c.isSmart)
+  if (smartOnes.length === 0) return collections
+
+  const { getImages } = await import('./images')
+  const { evaluateSmartRules } = await import('./smart-collections')
+  const allImages = await getImages()
+
+  return collections.map((c) => {
+    if (!c.isSmart) return c
+    const matched = evaluateSmartRules(c.smartRules, allImages)
+    return {
+      ...c,
+      imageCount: matched.length,
+      coverImageUrl: c.coverImageUrl ?? matched[0]?.urls.medium ?? null,
+    }
+  })
 }
 
 export async function getCollectionBySlug(
   slug: string,
   opts: { includeProtected?: boolean } = {}
 ): Promise<Collection | null> {
-  if (!isSupabaseConfigured()) return FALLBACK.find((c) => c.slug === slug) ?? null
+  if (!isSupabaseConfigured()) {
+    const found = FALLBACK.find((c) => c.slug === slug)
+    if (!found) return null
+    const [resolved] = await resolveSmartCollectionCounts([found])
+    return resolved
+  }
 
   // Password-protected collections are excluded from the anon read policy
   // entirely (see supabase/migrations/0001_init.sql). Pages that need to
@@ -42,5 +74,7 @@ export async function getCollectionBySlug(
   // with the service-role client instead.
   const supabase = opts.includeProtected ? getSupabaseAdminClient()! : (await getSupabaseServerClient())!
   const { data } = await supabase.from('collections').select(SELECT).eq('slug', slug).single()
-  return data ? mapCollectionRow(data) : null
+  if (!data) return null
+  const [resolved] = await resolveSmartCollectionCounts([mapCollectionRow(data)])
+  return resolved
 }
