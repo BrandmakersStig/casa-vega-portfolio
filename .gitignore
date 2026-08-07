@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated dev-fallback seed images (run `npm run seed` to (re)generate from
+# a local folder of photos — never committed, can be large binary WebP files).
+# lib/data/fallback/*.json IS tracked: it ships with safe empty defaults so a
+# fresh clone builds without a seed step, and `npm run seed` overwrites it
+# locally with your real photo metadata — commit that update if you want the
+# seeded dataset to ship with the repo, or leave it uncommitted otherwise.
+/public/seed/

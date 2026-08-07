@@ -1,0 +1,19 @@
+{
+  "heroMode": "slideshow",
+  "heroImageIds": [
+    "buddy-02",
+    "buddy-07",
+    "cape-wotn-se-04",
+    "cape-wotn-se-09",
+    "cape-wotn-se-13",
+    "chicago-05"
+  ],
+  "heroVideoUrl": null,
+  "siteTitle": "Portfolio",
+  "siteTagline": "Øjeblikke, komponeret.",
+  "aboutMarkdown": "## Om\n\nEt kuratorisk udvalg af fotografier — rejser, mennesker og de stille øjeblikke imellem.",
+  "contactEmail": "stig@brandmakers.dk",
+  "defaultInfoPanelMode": "title",
+  "defaultLayoutMode": "justified",
+  "watermarkText": null
+}
