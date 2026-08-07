@@ -10,10 +10,10 @@ import { useFavoritesStore } from '@/store/favorites-store'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
-  { href: '/', label: 'Portfolio' },
-  { href: '/collections', label: 'Collections' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/', label: 'Forside' },
+  { href: '/collections', label: 'Kollektioner' },
+  { href: '/about', label: 'Om' },
+  { href: '/contact', label: 'Kontakt' },
 ]
 
 export function SiteNav({ siteTitle }: { siteTitle: string }) {

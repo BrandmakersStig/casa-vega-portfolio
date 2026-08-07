@@ -1,15 +1,15 @@
 import Link from 'next/link'
 
 const EXPLORE = [
-  { href: '/collections', label: 'Collections' },
+  { href: '/collections', label: 'Kollektioner' },
   { href: '/map', label: 'Kort' },
-  { href: '/cinematic', label: 'Cinematic view' },
-  { href: '/light-table', label: 'Light table' },
+  { href: '/cinematic', label: 'Filmisk visning' },
+  { href: '/light-table', label: 'Lysbord' },
 ]
 
 const INFO = [
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/about', label: 'Om' },
+  { href: '/contact', label: 'Kontakt' },
   { href: '/favorites', label: 'Favoritter' },
 ]
 

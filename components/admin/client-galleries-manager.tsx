@@ -50,7 +50,7 @@ export function ClientGalleriesManager({ galleries, collections }: { galleries: 
   }
 
   async function remove(id: string) {
-    if (!confirm('Slet klientgalleri? Selve billederne/collections berøres ikke.')) return
+    if (!confirm('Slet klientgalleri? Selve billederne/kollektionerne berøres ikke.')) return
     await fetch(`/api/admin/client-galleries/${id}`, { method: 'DELETE' })
     router.refresh()
   }
@@ -87,7 +87,7 @@ export function ClientGalleriesManager({ galleries, collections }: { galleries: 
           className="w-full border border-input bg-transparent px-3 py-2 text-sm"
         />
         <div>
-          <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">Collections i galleriet</p>
+          <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">Kollektioner i galleriet</p>
           <div className="flex flex-wrap gap-3">
             {collections.map((c) => (
               <label key={c.id} className="flex items-center gap-1.5 text-sm">
@@ -119,7 +119,7 @@ export function ClientGalleriesManager({ galleries, collections }: { galleries: 
               <p className="font-medium">{g.title}</p>
               {g.clientName && <p className="text-xs text-muted-foreground">{g.clientName}</p>}
             </div>
-            <span className="text-xs text-muted-foreground">{g.collectionIds.length} collections</span>
+            <span className="text-xs text-muted-foreground">{g.collectionIds.length} kollektioner</span>
             <button onClick={() => copyLink(g.slug, g.id)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               {copiedId === g.id ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
               {copiedId === g.id ? 'Kopieret' : 'Kopiér link'}

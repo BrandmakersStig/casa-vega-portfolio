@@ -8,7 +8,7 @@ export function FeaturedCollections({ collections }: { collections: Collection[]
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
       <div className="mb-10 flex items-end justify-between">
-        <h2 className="font-display text-3xl font-light">Udvalgte collections</h2>
+        <h2 className="font-display text-3xl font-light">Udvalgte kollektioner</h2>
         <Link href="/collections" className="text-sm text-muted-foreground hover:text-foreground">
           Se alle →
         </Link>

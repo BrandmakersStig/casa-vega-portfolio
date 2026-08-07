@@ -5,7 +5,7 @@ export default async function AdminCollectionsPage() {
   const collections = await getCollections({ includeAll: true })
   return (
     <div>
-      <h1 className="font-display text-3xl font-light">Collections</h1>
+      <h1 className="font-display text-3xl font-light">Kollektioner</h1>
       <div className="mt-6">
         <CollectionsManager collections={collections} />
       </div>

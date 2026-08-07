@@ -19,6 +19,8 @@ const SUPABASE_DEFAULTS: SiteSettings = {
   siteTagline: 'Øjeblikke, komponeret.',
   aboutMarkdown: '## Om\n\nSkriv en introduktion her fra /admin/settings.',
   contactEmail: 'kontakt@example.com',
+  contactHeading: 'Kontakt',
+  contactIntro: 'Interesseret i et samarbejde, print eller en klientgalleri? Skriv endelig.',
   defaultInfoPanelMode: 'title',
   defaultLayoutMode: 'justified',
   watermarkText: null,

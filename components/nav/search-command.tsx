@@ -87,12 +87,12 @@ export function SearchCommand() {
       >
         <Search className="size-4" />
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} title="Søg i portfolio" description="Søg efter billeder, collections, kamera eller lokation">
+      <CommandDialog open={open} onOpenChange={setOpen} title="Søg i portfolio" description="Søg efter billeder, kollektioner, kamera eller lokation">
         <CommandInput placeholder="Søg efter titel, keyword, kamera, lokation…" value={query} onValueChange={setQuery} />
         <CommandList>
           <CommandEmpty>{query ? 'Ingen resultater.' : 'Begynd at skrive for at søge.'}</CommandEmpty>
           {collections.length > 0 && (
-            <CommandGroup heading="Collections">
+            <CommandGroup heading="Kollektioner">
               {collections.map((c) => (
                 <CommandItem key={c.id} value={`collection-${c.id}`} onSelect={() => go(`/collections/${c.slug}`)}>
                   {c.cover && (

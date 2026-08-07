@@ -53,10 +53,6 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         </div>
       )}
       <div>
-        <label className="block text-xs uppercase tracking-wider text-muted-foreground">Kontakt-email</label>
-        <input value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} className="mt-1 w-full border border-input bg-transparent px-3 py-2 text-sm" />
-      </div>
-      <div>
         <label className="block text-xs uppercase tracking-wider text-muted-foreground">Vandmærke-tekst (valgfri)</label>
         <input
           value={form.watermarkText ?? ''}
@@ -64,8 +60,10 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
           className="mt-1 w-full border border-input bg-transparent px-3 py-2 text-sm"
         />
       </div>
-      <div>
-        <label className="block text-xs uppercase tracking-wider text-muted-foreground">Om-side (Markdown)</label>
+
+      <div className="border-t border-border pt-5">
+        <p className="mb-3 font-display text-lg font-light">Om-side</p>
+        <label className="block text-xs uppercase tracking-wider text-muted-foreground">Indhold (Markdown)</label>
         <textarea
           value={form.aboutMarkdown}
           onChange={(e) => setForm({ ...form, aboutMarkdown: e.target.value })}
@@ -73,6 +71,38 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
           className="mt-1 w-full border border-input bg-transparent px-3 py-2 text-sm"
         />
       </div>
+
+      <div className="border-t border-border pt-5">
+        <p className="mb-3 font-display text-lg font-light">Kontakt-side</p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-muted-foreground">Overskrift</label>
+            <input
+              value={form.contactHeading}
+              onChange={(e) => setForm({ ...form, contactHeading: e.target.value })}
+              className="mt-1 w-full border border-input bg-transparent px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-muted-foreground">Introtekst</label>
+            <textarea
+              value={form.contactIntro}
+              onChange={(e) => setForm({ ...form, contactIntro: e.target.value })}
+              rows={2}
+              className="mt-1 w-full border border-input bg-transparent px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-muted-foreground">Kontakt-email</label>
+            <input
+              value={form.contactEmail}
+              onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
+              className="mt-1 w-full border border-input bg-transparent px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
       <button disabled={saving} className="border border-foreground px-4 py-2 text-xs uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50">
         {saving ? 'Gemmer…' : saved ? 'Gemt ✓' : 'Gem indstillinger'}
       </button>

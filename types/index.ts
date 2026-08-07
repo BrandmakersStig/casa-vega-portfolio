@@ -150,6 +150,8 @@ export interface SiteSettings {
   siteTagline: string
   aboutMarkdown: string
   contactEmail: string
+  contactHeading: string
+  contactIntro: string
   defaultInfoPanelMode: InfoPanelMode
   defaultLayoutMode: LayoutMode
   watermarkText: string | null

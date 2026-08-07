@@ -13,7 +13,7 @@ export function LightTableButton({ imageId, className }: { imageId: string; clas
     <Button
       variant="ghost"
       size="icon"
-      aria-label={isOn ? 'Fjern fra light table' : 'Tilføj til light table'}
+      aria-label={isOn ? 'Fjern fra lysbord' : 'Tilføj til lysbord'}
       aria-pressed={isOn}
       onClick={() => toggle(imageId)}
       className={cn(className)}

@@ -113,7 +113,7 @@ export function LightTableView() {
             <div key={img.id} className="relative flex shrink-0 flex-col" style={{ width: 'max-content' }}>
               <button
                 onClick={() => remove(img.id)}
-                aria-label="Fjern fra light table"
+                aria-label="Fjern fra lysbord"
                 className="absolute right-2 top-2 z-10 inline-flex size-7 items-center justify-center bg-black/60 text-white hover:bg-black/80"
               >
                 <X className="size-4" />

@@ -244,6 +244,8 @@ async function main() {
     aboutMarkdown:
       '## Om\n\nEt kuratorisk udvalg af fotografier — rejser, mennesker og de stille øjeblikke imellem.',
     contactEmail: 'stig@brandmakers.dk',
+    contactHeading: 'Kontakt',
+    contactIntro: 'Interesseret i et samarbejde, print eller en klientgalleri? Skriv endelig.',
     defaultInfoPanelMode: 'title',
     defaultLayoutMode: 'justified',
     watermarkText: null,

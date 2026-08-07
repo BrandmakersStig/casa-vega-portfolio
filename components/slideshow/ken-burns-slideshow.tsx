@@ -45,23 +45,42 @@ export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: Portfoli
       onMouseLeave={() => setShowCaption(false)}
       onClick={() => setIndex((i) => (i + 1) % images.length)}
     >
+      {/* Decorative blurred backdrop only — fills the viewport behind the
+          real image so portrait photos in a wide viewport (or vice versa)
+          don't leave stark black bars. This layer is allowed to crop; the
+          foreground photo below never is. */}
+      <div className="absolute inset-0" aria-hidden>
+        <Image
+          key={`bg-${current.id}`}
+          src={current.urls.medium}
+          alt=""
+          fill
+          sizes="100vw"
+          className="scale-110 object-cover opacity-40 blur-3xl"
+        />
+      </div>
+
+      {/* The actual photo — object-contain so the full, uncropped frame is
+          always visible, exactly as shot. Previously used object-cover
+          full-bleed, which aggressively cropped any image whose aspect
+          ratio didn't match the viewport (reported: crops way too much). */}
       <AnimatePresence mode="sync">
         <motion.div
           key={current.id}
           className="absolute inset-0"
           initial={{ opacity: 0, scale: 1 }}
-          animate={{ opacity: 1, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1.06 }}
           exit={{ opacity: 0 }}
           transition={{ opacity: { duration: 1.6, ease: 'easeInOut' }, scale: { duration: SLIDE_DURATION / 1000, ease: 'linear' } }}
         >
-          <Image src={current.urls.large} alt={current.title} fill priority sizes="100vw" className="object-cover" />
+          <Image src={current.urls.large} alt={current.title} fill priority sizes="100vw" className="object-contain" />
         </motion.div>
       </AnimatePresence>
 
       <Link
         href={exitHref}
         onClick={(e) => e.stopPropagation()}
-        aria-label="Afslut cinematic view"
+        aria-label="Afslut filmisk visning"
         className="absolute right-4 top-4 z-10 inline-flex size-9 items-center justify-center text-white/70 transition-opacity hover:text-white"
       >
         <X className="size-5" />

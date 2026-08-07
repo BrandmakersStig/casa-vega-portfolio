@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import { getSettings } from '@/lib/data/settings'
 
-export const metadata: Metadata = { title: 'About' }
+export const metadata: Metadata = { title: 'Om' }
 
 export default async function AboutPage() {
   const settings = await getSettings()

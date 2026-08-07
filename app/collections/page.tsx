@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getCollections } from '@/lib/data/collections'
 import { CollectionCard } from '@/components/collections/collection-card'
 
-export const metadata: Metadata = { title: 'Collections' }
+export const metadata: Metadata = { title: 'Kollektioner' }
 
 export default async function CollectionsPage() {
   const collections = await getCollections()
@@ -10,8 +10,8 @@ export default async function CollectionsPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <header className="mb-12">
-        <h1 className="font-display text-4xl font-light">Collections</h1>
-        <p className="mt-2 text-muted-foreground">{collections.length} collections</p>
+        <h1 className="font-display text-4xl font-light">Kollektioner</h1>
+        <p className="mt-2 text-muted-foreground">{collections.length} kollektioner</p>
       </header>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {collections.map((c, i) => (
