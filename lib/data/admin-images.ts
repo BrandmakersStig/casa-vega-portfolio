@@ -99,7 +99,10 @@ export async function createImageFromUpload(input: UploadInput): Promise<Portfol
         blurhash,
         storage_path: storagePath,
       })
-      .select('*, collection:collections(slug)')
+      // Two FK paths exist between images and collections (collection_id
+      // and collections.cover_image_id), so PostgREST needs the explicit
+      // !constraint_name hint — same fix as lib/data/images.ts.
+      .select('*, collection:collections!images_collection_id_fkey(slug)')
       .single()
     if (error) throw error
 
