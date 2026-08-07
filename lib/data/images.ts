@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { FilterState, PortfolioImage, SortOption } from '@/types'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
@@ -11,6 +12,27 @@ const FALLBACK = fallbackImages as PortfolioImage[]
 const PROTECTED_COLLECTION_IDS = new Set(
   (fallbackCollections as Collection[]).filter((c) => c.passwordProtected).map((c) => c.id)
 )
+
+// image_stats is a view (not a table with an FK to images), so PostgREST
+// can't auto-detect it for `select('*, image_stats(*)')` embedding — fetch
+// it as a separate query and merge instead.
+async function attachStats(supabase: SupabaseClient, images: PortfolioImage[]): Promise<PortfolioImage[]> {
+  if (images.length === 0) return images
+  const { data } = await supabase
+    .from('image_stats')
+    .select('image_id, views, favorites, downloads, shares, comments')
+    .in(
+      'image_id',
+      images.map((i) => i.id)
+    )
+  const byId = new Map((data ?? []).map((s) => [s.image_id, s]))
+  return images.map((img) => {
+    const s = byId.get(img.id)
+    return s
+      ? { ...img, viewCount: s.views, favoriteCount: s.favorites, downloadCount: s.downloads, shareCount: s.shares, commentCount: s.comments }
+      : img
+  })
+}
 
 export interface ImageQuery {
   collectionId?: string
@@ -90,7 +112,7 @@ export async function getImages(query: ImageQuery = {}): Promise<PortfolioImage[
   }
 
   const supabase = query.includeAll ? getSupabaseAdminClient()! : (await getSupabaseServerClient())!
-  let q = supabase.from('images').select('*, image_stats(*), collection:collections(slug)')
+  let q = supabase.from('images').select('*, collection:collections!images_collection_id_fkey(slug)')
   if (!query.includeAll) q = q.eq('visibility', 'public')
 
   if (query.collectionId) q = q.eq('collection_id', query.collectionId)
@@ -124,7 +146,7 @@ export async function getImages(query: ImageQuery = {}): Promise<PortfolioImage[
 
   const { data, error } = await q
   if (error) throw error
-  let mapped = (data ?? []).map(mapImageRow)
+  let mapped = await attachStats(supabase, (data ?? []).map(mapImageRow))
   if (query.sort === 'most-viewed' || query.sort === 'most-commented' || query.sort === 'random') {
     mapped = sortImages(mapped, query.sort)
   }
@@ -136,23 +158,27 @@ export async function getImageBySlug(collectionSlug: string, imageSlug: string):
     const image = FALLBACK.find((i) => i.slug === imageSlug && i.collectionSlug === collectionSlug)
     return image ?? null
   }
-  const supabase = await getSupabaseServerClient()
-  const { data: collection } = await supabase!.from('collections').select('id').eq('slug', collectionSlug).single()
+  const supabase = (await getSupabaseServerClient())!
+  const { data: collection } = await supabase.from('collections').select('id').eq('slug', collectionSlug).single()
   if (!collection) return null
-  const { data } = await supabase!
+  const { data } = await supabase
     .from('images')
-    .select('*, image_stats(*), collection:collections(slug)')
+    .select('*, collection:collections!images_collection_id_fkey(slug)')
     .eq('collection_id', collection.id)
     .eq('slug', imageSlug)
     .single()
-  return data ? mapImageRow(data) : null
+  if (!data) return null
+  const [withStats] = await attachStats(supabase, [mapImageRow(data)])
+  return withStats
 }
 
 export async function getImageById(id: string): Promise<PortfolioImage | null> {
   if (!isSupabaseConfigured()) return FALLBACK.find((i) => i.id === id) ?? null
-  const supabase = await getSupabaseServerClient()
-  const { data } = await supabase!.from('images').select('*, image_stats(*), collection:collections(slug)').eq('id', id).single()
-  return data ? mapImageRow(data) : null
+  const supabase = (await getSupabaseServerClient())!
+  const { data } = await supabase.from('images').select('*, collection:collections!images_collection_id_fkey(slug)').eq('id', id).single()
+  if (!data) return null
+  const [withStats] = await attachStats(supabase, [mapImageRow(data)])
+  return withStats
 }
 
 export interface Facets {

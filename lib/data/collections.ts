@@ -6,7 +6,10 @@ import { mapCollectionRow } from './mappers'
 import fallbackCollections from './fallback/collections.json'
 
 const FALLBACK = fallbackCollections as Collection[]
-const SELECT = '*, images(count), cover:images!collections_cover_image_fk(*)'
+// Two FK paths exist between collections and images (images.collection_id
+// and collections.cover_image_id), so PostgREST needs an explicit
+// !constraint_name hint on each embed to disambiguate which one to use.
+const SELECT = '*, images!images_collection_id_fkey(count), cover:images!collections_cover_image_fk(*)'
 
 export async function getCollections(opts: { featuredOnly?: boolean; includeAll?: boolean } = {}): Promise<Collection[]> {
   if (!isSupabaseConfigured()) {
