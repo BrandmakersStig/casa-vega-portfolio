@@ -9,6 +9,7 @@ const NAV = [
   { href: '/admin/images', label: 'Billeder' },
   { href: '/admin/collections', label: 'Collections' },
   { href: '/admin/client-galleries', label: 'Klientgallerier' },
+  { href: '/admin/print-orders', label: 'Print-bestillinger' },
   { href: '/admin/comments', label: 'Kommentarer' },
   { href: '/admin/settings', label: 'Indstillinger' },
 ]

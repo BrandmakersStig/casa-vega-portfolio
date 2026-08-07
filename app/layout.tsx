@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/sonner'
 import { SiteNav } from '@/components/nav/site-nav'
 import { SiteFooter } from '@/components/footer/site-footer'
+import { ServiceWorkerRegistration } from '@/components/providers/service-worker-registration'
 import { getSettings } from '@/lib/data/settings'
 
 const inter = Inter({
@@ -66,6 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </main>
             <SiteFooter siteTitle={settings.siteTitle} contactEmail={settings.contactEmail} />
             <Toaster position="bottom-center" />
+            <ServiceWorkerRegistration />
           </TooltipProvider>
         </ThemeProvider>
       </body>

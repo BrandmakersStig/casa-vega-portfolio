@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Sparkles } from 'lucide-react'
 import type { Collection, PortfolioImage } from '@/types'
 
 type Row = PortfolioImage
@@ -12,6 +14,21 @@ export function ImagesTable({ images, collections }: { images: Row[]; collection
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [rows, setRows] = useState(images)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [aiLoadingId, setAiLoadingId] = useState<string | null>(null)
+
+  async function generateAi(row: Row) {
+    setAiLoadingId(row.id)
+    const res = await fetch(`/api/admin/images/${row.id}/ai-generate`, { method: 'POST' })
+    const data = await res.json()
+    setAiLoadingId(null)
+    if (!res.ok) {
+      toast.error(data.error ?? 'AI-generering fejlede')
+      return
+    }
+    const mergedKeywords = [...new Set([...row.keywords, ...(data.aiKeywords ?? [])])]
+    update(row.id, { keywords: mergedKeywords, description: row.description ?? data.aiDescription })
+    toast.success('AI-forslag tilføjet — husk at trykke Gem', { description: data.aiDescription })
+  }
 
   function toggle(id: string) {
     setSelected((s) => {
@@ -33,6 +50,7 @@ export function ImagesTable({ images, collections }: { images: Row[]; collection
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: row.title,
+        description: row.description,
         rating: row.rating,
         keywords: row.keywords,
         collectionId: row.collectionId,
@@ -171,13 +189,24 @@ export function ImagesTable({ images, collections }: { images: Row[]; collection
                   <input type="checkbox" checked={row.featured} onChange={(e) => update(row.id, { featured: e.target.checked })} />
                 </td>
                 <td className="py-2">
-                  <button
-                    onClick={() => saveRow(row)}
-                    disabled={savingId === row.id}
-                    className="border border-foreground px-2 py-1 text-xs uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50"
-                  >
-                    {savingId === row.id ? '…' : 'Gem'}
-                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => generateAi(row)}
+                      disabled={aiLoadingId === row.id}
+                      aria-label="Generér keywords og beskrivelse med AI"
+                      title="Generér keywords og beskrivelse med AI"
+                      className="border border-input px-2 py-1 text-muted-foreground hover:border-foreground hover:text-foreground disabled:opacity-50"
+                    >
+                      <Sparkles className={aiLoadingId === row.id ? 'size-3.5 animate-pulse' : 'size-3.5'} />
+                    </button>
+                    <button
+                      onClick={() => saveRow(row)}
+                      disabled={savingId === row.id}
+                      className="border border-foreground px-2 py-1 text-xs uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50"
+                    >
+                      {savingId === row.id ? '…' : 'Gem'}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

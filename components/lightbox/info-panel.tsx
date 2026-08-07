@@ -7,6 +7,7 @@ import { ExifList } from './exif-list'
 import { CommentSection } from './comment-section'
 import { FavoriteButton } from '@/components/favorites/favorite-button'
 import { LightTableButton } from '@/components/light-table/light-table-button'
+import { PrintOrderDialog } from './print-order-dialog'
 import { ShareMenu } from './share-menu'
 
 export function InfoPanel({ image }: { image: PortfolioImage }) {
@@ -20,6 +21,7 @@ export function InfoPanel({ image }: { image: PortfolioImage }) {
         <div className="flex shrink-0 items-center gap-1">
           <FavoriteButton imageId={image.id} className="text-white hover:bg-white/10" />
           <LightTableButton imageId={image.id} className="text-white hover:bg-white/10" />
+          <PrintOrderDialog image={image} className="text-white hover:bg-white/10" />
           <ShareMenu image={image} />
         </div>
       </div>

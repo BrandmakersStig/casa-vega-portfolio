@@ -209,7 +209,18 @@ export async function createImageFromUpload(input: UploadInput): Promise<Portfol
 type ImagePatch = Partial<
   Pick<
     PortfolioImage,
-    'title' | 'description' | 'keywords' | 'rating' | 'collectionId' | 'visibility' | 'featured' | 'downloadPolicy' | 'location'
+    | 'title'
+    | 'description'
+    | 'keywords'
+    | 'rating'
+    | 'collectionId'
+    | 'visibility'
+    | 'featured'
+    | 'downloadPolicy'
+    | 'location'
+    | 'aiKeywords'
+    | 'aiDescription'
+    | 'aiGeneratedAt'
   >
 >
 
@@ -223,6 +234,9 @@ const PATCH_TO_COLUMN: Record<string, string> = {
   featured: 'featured',
   downloadPolicy: 'download_policy',
   location: 'location',
+  aiKeywords: 'ai_keywords',
+  aiDescription: 'ai_description',
+  aiGeneratedAt: 'ai_generated_at',
 }
 
 export async function updateImage(id: string, patch: ImagePatch): Promise<void> {

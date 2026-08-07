@@ -155,6 +155,20 @@ export interface SiteSettings {
   watermarkText: string | null
 }
 
+export type PrintOrderStatus = 'inquiry' | 'confirmed' | 'shipped' | 'cancelled'
+
+export interface PrintOrder {
+  id: string
+  imageId: string
+  customerName: string
+  customerEmail: string
+  size: string
+  material: string | null
+  status: PrintOrderStatus
+  notes: string | null
+  createdAt: string
+}
+
 export interface FilterState {
   query: string
   ratingMin: number | null
