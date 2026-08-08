@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { Maximize2, Minimize2, X } from 'lucide-react'
 import type { PortfolioImage } from '@/types'
 
 const SLIDE_DURATION = 6000
@@ -37,6 +37,8 @@ function useViewportSize() {
 export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: PortfolioImage[]; exitHref?: string }) {
   const [index, setIndex] = useState(0)
   const [showCaption, setShowCaption] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const viewport = useViewportSize()
 
   useEffect(() => {
@@ -45,10 +47,30 @@ export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: Portfoli
     return () => clearInterval(id)
   }, [images.length])
 
+  // Track real fullscreen state (not just "did we call requestFullscreen")
+  // — the browser's own Esc-to-exit, F11, etc. all fire this event too, so
+  // this is the only reliable source of truth for the button's icon.
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(document.fullscreenElement === containerRef.current)
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.().catch(() => {})
+    } else {
+      document.exitFullscreen?.().catch(() => {})
+    }
+  }
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') setIndex((i) => (i + 1) % images.length)
       if (e.key === 'ArrowLeft') setIndex((i) => (i - 1 + images.length) % images.length)
+      if (e.key === 'f' || e.key === 'F') toggleFullscreen()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -77,6 +99,7 @@ export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: Portfoli
 
   return (
     <div
+      ref={containerRef}
       className="relative h-svh w-full overflow-hidden bg-black"
       onMouseMove={() => setShowCaption(true)}
       onMouseLeave={() => setShowCaption(false)}
@@ -113,6 +136,17 @@ export function KenBurnsSlideshow({ images, exitHref = '/' }: { images: Portfoli
           <Image src={current.urls.large} alt={current.title} fill priority sizes="100vw" className="object-contain" />
         </motion.div>
       </AnimatePresence>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleFullscreen()
+        }}
+        aria-label={isFullscreen ? 'Afslut fuld skærm' : 'Fuld skærm'}
+        className="absolute right-16 top-4 z-10 inline-flex size-9 items-center justify-center text-white/70 transition-opacity hover:text-white"
+      >
+        {isFullscreen ? <Minimize2 className="size-5" /> : <Maximize2 className="size-5" />}
+      </button>
 
       <Link
         href={exitHref}
